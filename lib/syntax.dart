@@ -100,6 +100,30 @@ class TypeDefinition {
   }
 
   //Luanvm
+  String jsonParseGetProp(String key) {
+    final fieldKey = fixFieldName(key, typeDef: this);
+    return """if($fieldKey != null) object[$fieldKey] = '$fieldKey';""";
+  }
+
+  //Luanvm
+  String jsonParseInitTranslate(String key) {
+    final fieldKey = fixFieldName(key, typeDef: this);
+    return """if($fieldKey != null) object['$fieldKey'] = '';""";
+  }
+
+  //Luanvm
+  String jsonParseConvertClassToObject(String key) {
+    final fieldKey = fixFieldName(key, typeDef: this);
+    return """if($fieldKey != null) object['$fieldKey'] = $fieldKey;""";
+  }
+
+  //Luanvm
+  String jsonParse(String key) {
+    final fieldKey = fixFieldName(key, typeDef: this);
+    return """if($fieldKey != null) object[$fieldKey] = '$fieldKey';""";
+  }
+
+  //Luanvm
   String jsonParseExpression(String key, bool privateField) {
     final jsonKey = "json['$key']";
     final fieldKey =
@@ -322,6 +346,39 @@ class ClassDefinition {
     return sb.toString();
   }
 
+  String get _jsonGetProps {
+    final sb = new StringBuffer();
+    sb.write('dynamic getProps(dynamic key) {\n');
+    sb.write('var object = Map<dynamic, String>();\n');
+    fields.keys.forEach((k) {
+      sb.write('\t\t${fields[k].jsonParseGetProp(k)}\n');
+    });
+    sb.write('\t return object[key];}');
+    return sb.toString();
+  }
+
+  String get _jsonGetInitTranslate {
+    final sb = new StringBuffer();
+    sb.write('Map<String, String> initTranslate() {\n');
+    sb.write('var object = Map<String, String>();\n');
+    fields.keys.forEach((k) {
+      sb.write('\t\t${fields[k].jsonParseInitTranslate(k)}\n');
+    });
+    sb.write('\t return object;}');
+    return sb.toString();
+  }
+
+  String get _jsonConverClassToObject {
+    final sb = new StringBuffer();
+    sb.write('Map<String, dynamic> convertToObject() {\n');
+    sb.write('var object = Map<String, dynamic>();\n');
+    fields.keys.forEach((k) {
+      sb.write('\t\t${fields[k].jsonParseConvertClassToObject(k)}\n');
+    });
+    sb.write('\t return object;}');
+    return sb.toString();
+  }
+
   String get _jsonGenFunc {
     final sb = new StringBuffer();
     sb.write(
@@ -336,9 +393,9 @@ class ClassDefinition {
 
   String toString() {
     if (privateFields) {
-      return 'class $name {\n$_fieldList\n\n$_defaultPrivateConstructor\n\n$_gettersSetters\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n}\n';
+      return 'class $name {\n$_fieldList\n\n$_defaultPrivateConstructor\n\n$_gettersSetters\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n\n$_jsonGetProps\n\n$_jsonGetInitTranslate\n\n$_jsonConverClassToObject\n}\n';
     } else {
-      return 'class $name {\n$_fieldList\n\n$_defaultConstructor\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n}\n';
+      return 'class $name {\n$_fieldList\n\n$_defaultConstructor\n\n$_jsonParseFunc\n\n$_jsonGenFunc\n\n$_jsonGetProps\n\n$_jsonGetInitTranslate\n\n$_jsonConverClassToObject\n}\n';
     }
   }
 }
