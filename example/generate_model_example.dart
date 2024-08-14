@@ -14,7 +14,7 @@ String _scriptPath() {
 }
 
 main() {
-  final classGenerator = new ModelGenerator('InvoiceStatistic');
+  final classGenerator = new ModelGenerator('BankGenQrCode');
   final currentDirectory = dirname(_scriptPath());
   final filePath =
       normalize(join(currentDirectory.substring(1), 'sample.json'));
